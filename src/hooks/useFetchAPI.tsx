@@ -72,11 +72,7 @@ export function FetchAPIProvider({ children }: FetchAPIProviderProps) {
 
   const fetchTransactions = useCallback(
     async (filters: TransactionsFilterData) => {
-      const transactions = await APIService.getTransactions({
-        ...filters,
-        beginDate: formatDate(filters.beginDate),
-        endDate: formatDate(filters.endDate),
-      });
+      const transactions = await APIService.getTransactions(filters);
 
       setTransactions(transactions);
     },
@@ -89,8 +85,8 @@ export function FetchAPIProvider({ children }: FetchAPIProviderProps) {
       endDate,
     }: Pick<TransactionsFilterData, 'beginDate' | 'endDate'>) => {
       const dashboard = await APIService.getDashboard({
-        beginDate: formatDate(beginDate),
-        endDate: formatDate(endDate),
+        beginDate,
+        endDate,
       });
 
       setDashboard(dashboard);
