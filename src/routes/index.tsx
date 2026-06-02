@@ -2,6 +2,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from '../contexts/auth.context';
 import { LoginPage } from '../pages/login';
 import { DashboardPage } from '../pages/dashboard';
+import { CategoriasPage } from '../pages/categorias';
 
 export function AppRoutes() {
   const { isAuthenticated } = useAuth();
@@ -17,6 +18,12 @@ export function AppRoutes() {
       <Route
         path="/dashboard"
         element={isAuthenticated ? <DashboardPage /> : <Navigate to="/login" />}
+      />
+      <Route
+        path="/categorias"
+        element={
+          isAuthenticated ? <CategoriasPage /> : <Navigate to="/login" />
+        }
       />
       <Route
         path="*"
