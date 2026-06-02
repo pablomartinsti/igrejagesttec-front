@@ -126,6 +126,10 @@ export const Main = styled.main`
   flex-direction: column;
   min-height: 100vh;
 
+  @media (max-width: 1024px) {
+    margin-left: 240px;
+  }
+
   @media (max-width: 768px) {
     margin-left: 0;
   }
