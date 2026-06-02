@@ -3,6 +3,7 @@ import { useAuth } from '../contexts/auth.context';
 import { LoginPage } from '../pages/login';
 import { DashboardPage } from '../pages/dashboard';
 import { CategoriasPage } from '../pages/categorias';
+import { TransacoesPage } from '../pages/transacoes';
 
 export function AppRoutes() {
   const { isAuthenticated } = useAuth();
@@ -23,6 +24,12 @@ export function AppRoutes() {
         path="/categorias"
         element={
           isAuthenticated ? <CategoriasPage /> : <Navigate to="/login" />
+        }
+      />
+      <Route
+        path="/transacoes"
+        element={
+          isAuthenticated ? <TransacoesPage /> : <Navigate to="/login" />
         }
       />
       <Route
