@@ -1,35 +1,47 @@
-import { createGlobalStyle } from 'styled-components';
-import { theme } from './theme';
+import { createGlobalStyle } from 'styled-components'
 
-export default createGlobalStyle`
+export const GlobalStyle = createGlobalStyle`
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
-    *{
+  * {
     margin: 0;
     padding: 0;
-    outline: 0;
     box-sizing: border-box;
-    }
+  }
 
-    body{
-    -webkit-font-smoothing:antialiased;
-    background-color: ${theme.colors.black};
-    }
+  body {
+    font-family: 'Inter', sans-serif;
+    background-color: ${({ theme }) => theme.colors.background};
+    color: ${({ theme }) => theme.colors.text.primary};
+    -webkit-font-smoothing: antialiased;
+  }
 
-    body, input, button,select{
-    font:1rem 'Lexend', sans-serif;
-    }
-    
-    h1 ,h2 ,p ,span, strong ,button, label, input {
-    line-height: 100%;
-    }
+  button {
+    cursor: pointer;
+    border: none;
+    outline: none;
+  }
 
-    #root{
-        max-width: 1280px;
-        margin: 0 auto;
+  input, textarea, select {
+    outline: none;
+    font-family: 'Inter', sans-serif;
+  }
 
-    }
+  a {
+    text-decoration: none;
+    color: inherit;
+  }
 
-    button{
-        cursor: pointer;
-    }
-    `;
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: ${({ theme }) => theme.colors.background};
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: ${({ theme }) => theme.colors.border};
+    border-radius: 3px;
+  }
+`

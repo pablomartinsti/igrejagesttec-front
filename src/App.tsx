@@ -1,12 +1,15 @@
-import { AppProvider } from './hooks';
-import { Home } from './screens/home';
-import GlobalStyles from './styles/global';
+import { BrowserRouter } from 'react-router-dom';
+import { AuthProvider } from './contexts/auth.context';
+import { AppRoutes } from './routes';
 
-export function App() {
+function App() {
   return (
-    <AppProvider>
-      <GlobalStyles />
-      <Home />
-    </AppProvider>
+    <BrowserRouter>
+      <AuthProvider>
+        <AppRoutes />
+      </AuthProvider>
+    </BrowserRouter>
   );
 }
+
+export default App;
