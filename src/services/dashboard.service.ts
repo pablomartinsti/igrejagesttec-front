@@ -16,7 +16,8 @@ export const DashboardService = {
     endDate,
   }: DashboardFilters): Promise<Dashboard> {
     const { data } = await api.get<Dashboard>('/transactions/dashboard', {
-      params: { beginDate, endDate },
+      params: { beginDate, endDate, _t: Date.now() },
+      headers: { 'Cache-Control': 'no-cache' },
     });
     return data;
   },

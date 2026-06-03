@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import dayjs from 'dayjs';
 import { Layout } from '../../components/layout';
@@ -52,67 +52,148 @@ const MONTHS = [
   'Dez',
 ];
 
+const initialDashboard: Dashboard = {
+  balance: {
+    _id: null,
+    incomes: 0,
+    expenses: 0,
+    balance: 0,
+  },
+  cashBalance: {
+    _id: null,
+    incomes: 0,
+    expenses: 0,
+    balance: 0,
+  },
+  expenses: [],
+};
+
 export function DashboardPage() {
   const location = useLocation();
-  const [dashboard, setDashboard] = useState<Dashboard>({
-    balance: { _id: null, incomes: 0, expenses: 0, balance: 0 },
-    cashBalance: { _id: null, incomes: 0, expenses: 0, balance: 0 },
-    expenses: [],
-  });
+  const dashboardRequestRef = useRef(0);
+
+  const [dashboard, setDashboard] = useState<Dashboard>(initialDashboard);
   const [financialEvolution, setFinancialEvolution] = useState<
     FinancialEvolution[]
   >([]);
+
   const [beginDate, setBeginDate] = useState(
     dayjs().startOf('month').format('YYYY-MM-DD'),
   );
+
   const [endDate, setEndDate] = useState(
     dayjs().endOf('month').format('YYYY-MM-DD'),
   );
+
   const [year, setYear] = useState(dayjs().year().toString());
   const [loading, setLoading] = useState(false);
 
   const fetchDashboard = useCallback(
-    async (selectedBeginDate = beginDate, selectedEndDate = endDate) => {
+    async (selectedBeginDate: string, selectedEndDate: string) => {
+      const requestId = dashboardRequestRef.current + 1;
+      dashboardRequestRef.current = requestId;
+
       try {
         setLoading(true);
+
+        const formattedBeginDate = formatDate(selectedBeginDate);
+        const formattedEndDate = formatDate(selectedEndDate);
+
         const data = await DashboardService.getDashboard({
-          beginDate: formatDate(selectedBeginDate),
-          endDate: formatDate(selectedEndDate),
+          beginDate: formattedBeginDate,
+          endDate: formattedEndDate,
         });
+
+        console.log('RETORNO DASHBOARD:', {
+          selectedBeginDate,
+          selectedEndDate,
+          formattedBeginDate,
+          formattedEndDate,
+          data,
+        });
+
+        if (requestId !== dashboardRequestRef.current) {
+          return;
+        }
+
+        if (!data || !data.balance) {
+          console.error('Dashboard retornou dados inválidos:', data);
+          return;
+        }
+
         setDashboard({
-          ...data,
+          balance: data.balance,
           cashBalance: data.cashBalance ?? data.balance,
+          expenses: data.expenses ?? [],
         });
       } catch (err) {
-        console.error(err);
+        console.error('Erro ao buscar dashboard:', err);
       } finally {
-        setLoading(false);
+        if (requestId === dashboardRequestRef.current) {
+          setLoading(false);
+        }
       }
     },
-    [beginDate, endDate],
+    [],
   );
 
-  const fetchFinancialEvolution = useCallback(async () => {
+  const fetchFinancialEvolution = useCallback(async (selectedYear: string) => {
     try {
-      const data = await DashboardService.getFinancialEvolution({ year });
+      const data = await DashboardService.getFinancialEvolution({
+        year: selectedYear,
+      });
+
       setFinancialEvolution(data);
     } catch (err) {
-      console.error(err);
+      console.error('Erro ao buscar evolução financeira:', err);
     }
-  }, [year]);
+  }, []);
 
-  useEffect(() => {
+  const refreshDashboard = useCallback(() => {
+    if (location.pathname !== '/dashboard') {
+      return;
+    }
+
     fetchDashboard(beginDate, endDate);
-    // O painel carrega ao entrar na rota; depois disso o usuario atualiza pelo filtro.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [location.key]);
+    fetchFinancialEvolution(year);
+  }, [
+    location.pathname,
+    beginDate,
+    endDate,
+    year,
+    fetchDashboard,
+    fetchFinancialEvolution,
+  ]);
 
   useEffect(() => {
-    fetchFinancialEvolution();
-  }, [fetchFinancialEvolution]);
+    refreshDashboard();
+  }, [location.pathname, location.key, refreshDashboard]);
+
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        refreshDashboard();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [refreshDashboard]);
+
+  const handleFilterDashboard = () => {
+    fetchDashboard(beginDate, endDate);
+  };
+
+  const handleFilterFinancialEvolution = () => {
+    fetchFinancialEvolution(year);
+  };
 
   const evolutionData = Array.from({ length: 12 }, (_, i) => {
-    const found = financialEvolution.find(e => e._id[1] === i + 1);
+    const found = financialEvolution.find(e => e._id?.[1] === i + 1);
+
     return {
       name: MONTHS[i],
       Receitas: found ? found.incomes / 100 : 0,
@@ -138,6 +219,7 @@ export function DashboardPage() {
             onChange={e => setBeginDate(e.target.value)}
           />
         </FilterGroup>
+
         <FilterGroup>
           <FilterLabel>Fim</FilterLabel>
           <FilterInput
@@ -146,7 +228,8 @@ export function DashboardPage() {
             onChange={e => setEndDate(e.target.value)}
           />
         </FilterGroup>
-        <FilterButton onClick={() => fetchDashboard()} disabled={loading}>
+
+        <FilterButton onClick={handleFilterDashboard} disabled={loading}>
           {loading ? '...' : '🔍 Filtrar'}
         </FilterButton>
       </FiltersRow>
@@ -161,15 +244,17 @@ export function DashboardPage() {
             </CardValue>
           </div>
         </Card>
+
         <Card $variant="default">
           <CardIcon>💰</CardIcon>
           <div>
-            <CardTitle>Saldo do periodo</CardTitle>
+            <CardTitle>Saldo do período</CardTitle>
             <CardValue $variant="default">
               {formatCurrency(dashboard.balance.balance)}
             </CardValue>
           </div>
         </Card>
+
         <Card $variant="income">
           <CardIcon>📈</CardIcon>
           <div>
@@ -179,6 +264,7 @@ export function DashboardPage() {
             </CardValue>
           </div>
         </Card>
+
         <Card $variant="expense">
           <CardIcon>📉</CardIcon>
           <div>
@@ -197,6 +283,7 @@ export function DashboardPage() {
             <SectionSubtitle>Despesas no período selecionado</SectionSubtitle>
           </div>
         </ChartHeader>
+
         {pieData.length > 0 ? (
           <ResponsiveContainer width="100%" height={300}>
             <PieChart>
@@ -212,9 +299,10 @@ export function DashboardPage() {
                 }
               >
                 {pieData.map((entry, index) => (
-                  <Cell key={index} fill={entry.color} />
+                  <Cell key={`${entry.name}-${index}`} fill={entry.color} />
                 ))}
               </Pie>
+
               <Tooltip formatter={value => formatCurrency(Number(value))} />
               <Legend />
             </PieChart>
@@ -230,6 +318,7 @@ export function DashboardPage() {
             <SectionTitle>Evolução Financeira</SectionTitle>
             <SectionSubtitle>Saldo, Receitas e Gastos no ano</SectionSubtitle>
           </div>
+
           <YearFilterRow>
             <FilterInput
               type="text"
@@ -238,9 +327,13 @@ export function DashboardPage() {
               onChange={e => setYear(e.target.value)}
               style={{ width: '100px' }}
             />
-            <FilterButton onClick={fetchFinancialEvolution}>🔍</FilterButton>
+
+            <FilterButton onClick={handleFilterFinancialEvolution}>
+              🔍
+            </FilterButton>
           </YearFilterRow>
         </ChartHeader>
+
         <ResponsiveContainer width="100%" height={300}>
           <BarChart data={evolutionData}>
             <XAxis dataKey="name" />
