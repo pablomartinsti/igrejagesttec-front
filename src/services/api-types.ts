@@ -40,10 +40,17 @@ export type FinancialEvolution = {
   balance: number;
 };
 
+export type CultoCategory = {
+  id: string;
+  title: string;
+  churchId: string;
+};
+
 export type Culto = {
   id: string;
   date: string;
-  type: 'FRIDAY_NIGHT' | 'SUNDAY_MORNING' | 'SUNDAY_NIGHT';
+  categoryId: string;
+  category: CultoCategory;
   preacher?: string;
   churchId: string;
   createdAt: string;
