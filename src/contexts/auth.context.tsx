@@ -11,7 +11,7 @@ type User = {
   id: string;
   name: string;
   email: string;
-  role: 'ADMIN' | 'PASTOR';
+  role: 'ADMIN' | 'TREASURER' | 'PASTOR';
 };
 
 type Church = {

@@ -35,7 +35,7 @@ export const FilterInput = styled.input`
   font-size: 0.875rem;
   color: #111827;
   background: white;
-  width: 130px;
+  width: 150px;
 
   &:focus {
     border-color: #2d6a4f;

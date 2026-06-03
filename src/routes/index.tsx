@@ -5,6 +5,7 @@ import { DashboardPage } from '../pages/dashboard';
 import { CategoriasPage } from '../pages/categorias';
 import { TransacoesPage } from '../pages/transacoes';
 import { CultosPage } from '../pages/cultos';
+import { CultoDetalhePage } from '../pages/culto-detalhe';
 
 export function AppRoutes() {
   const { isAuthenticated } = useAuth();
@@ -36,6 +37,12 @@ export function AppRoutes() {
       <Route
         path="/cultos"
         element={isAuthenticated ? <CultosPage /> : <Navigate to="/login" />}
+      />
+      <Route
+        path="/cultos/:id"
+        element={
+          isAuthenticated ? <CultoDetalhePage /> : <Navigate to="/login" />
+        }
       />
       <Route
         path="*"

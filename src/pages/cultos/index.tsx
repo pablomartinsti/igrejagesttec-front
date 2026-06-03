@@ -8,6 +8,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import dayjs from 'dayjs';
+import { formatDate } from '../../utils/format-date';
 import {
   PageHeader,
   HeaderActions,
@@ -116,13 +117,13 @@ export function CultosPage() {
 
   const openCreate = () => {
     setEditing(null);
-    reset({ date: dayjs().format('DD/MM/YYYY'), categoryId: '', preacher: '' });
+    reset({ date: dayjs().format('YYYY-MM-DD'), categoryId: '', preacher: '' });
     setModalOpen(true);
   };
 
   const openEdit = (culto: Culto) => {
     setEditing(culto);
-    setValue('date', dayjs(culto.date).format('DD/MM/YYYY'));
+    setValue('date', dayjs(culto.date).format('YYYY-MM-DD'));
     setValue('categoryId', culto.categoryId);
     setValue('preacher', culto.preacher || '');
     setModalOpen(true);
@@ -144,7 +145,7 @@ export function CultosPage() {
   const onSubmit = async (data: CultoFormData) => {
     try {
       const payload: CreateCultoData = {
-        date: dayjs(data.date, 'DD/MM/YYYY').format('YYYY-MM-DD'),
+        date: formatDate(data.date),
         categoryId: data.categoryId,
         preacher: data.preacher,
       };
@@ -255,7 +256,7 @@ export function CultosPage() {
               <InputGroup>
                 <Label>Data</Label>
                 <Input
-                  placeholder="dd/mm/aaaa"
+                  type="date"
                   {...register('date')}
                   $hasError={!!errors.date}
                 />

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import dayjs from 'dayjs';
 import { Layout } from '../../components/layout';
 import { DashboardService } from '../../services/dashboard.service';
@@ -52,36 +53,44 @@ const MONTHS = [
 ];
 
 export function DashboardPage() {
+  const location = useLocation();
   const [dashboard, setDashboard] = useState<Dashboard>({
     balance: { _id: null, incomes: 0, expenses: 0, balance: 0 },
+    cashBalance: { _id: null, incomes: 0, expenses: 0, balance: 0 },
     expenses: [],
   });
   const [financialEvolution, setFinancialEvolution] = useState<
     FinancialEvolution[]
   >([]);
   const [beginDate, setBeginDate] = useState(
-    dayjs().startOf('month').format('DD/MM/YYYY'),
+    dayjs().startOf('month').format('YYYY-MM-DD'),
   );
   const [endDate, setEndDate] = useState(
-    dayjs().endOf('month').format('DD/MM/YYYY'),
+    dayjs().endOf('month').format('YYYY-MM-DD'),
   );
   const [year, setYear] = useState(dayjs().year().toString());
   const [loading, setLoading] = useState(false);
 
-  const fetchDashboard = useCallback(async () => {
-    try {
-      setLoading(true);
-      const data = await DashboardService.getDashboard({
-        beginDate: formatDate(beginDate),
-        endDate: formatDate(endDate),
-      });
-      setDashboard(data);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  }, [beginDate, endDate]);
+  const fetchDashboard = useCallback(
+    async (selectedBeginDate = beginDate, selectedEndDate = endDate) => {
+      try {
+        setLoading(true);
+        const data = await DashboardService.getDashboard({
+          beginDate: formatDate(selectedBeginDate),
+          endDate: formatDate(selectedEndDate),
+        });
+        setDashboard({
+          ...data,
+          cashBalance: data.cashBalance ?? data.balance,
+        });
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [beginDate, endDate],
+  );
 
   const fetchFinancialEvolution = useCallback(async () => {
     try {
@@ -93,8 +102,10 @@ export function DashboardPage() {
   }, [year]);
 
   useEffect(() => {
-    fetchDashboard();
-  }, [fetchDashboard]);
+    fetchDashboard(beginDate, endDate);
+    // O painel carrega ao entrar na rota; depois disso o usuario atualiza pelo filtro.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.key]);
 
   useEffect(() => {
     fetchFinancialEvolution();
@@ -122,8 +133,7 @@ export function DashboardPage() {
         <FilterGroup>
           <FilterLabel>Início</FilterLabel>
           <FilterInput
-            type="text"
-            placeholder="dd/mm/aaaa"
+            type="date"
             value={beginDate}
             onChange={e => setBeginDate(e.target.value)}
           />
@@ -131,22 +141,30 @@ export function DashboardPage() {
         <FilterGroup>
           <FilterLabel>Fim</FilterLabel>
           <FilterInput
-            type="text"
-            placeholder="dd/mm/aaaa"
+            type="date"
             value={endDate}
             onChange={e => setEndDate(e.target.value)}
           />
         </FilterGroup>
-        <FilterButton onClick={fetchDashboard} disabled={loading}>
+        <FilterButton onClick={() => fetchDashboard()} disabled={loading}>
           {loading ? '...' : '🔍 Filtrar'}
         </FilterButton>
       </FiltersRow>
 
       <CardsGrid>
+        <Card $variant="cash">
+          <CardIcon>🏦</CardIcon>
+          <div>
+            <CardTitle>Saldo em caixa</CardTitle>
+            <CardValue $variant="cash">
+              {formatCurrency(dashboard.cashBalance.balance)}
+            </CardValue>
+          </div>
+        </Card>
         <Card $variant="default">
           <CardIcon>💰</CardIcon>
           <div>
-            <CardTitle>Saldo</CardTitle>
+            <CardTitle>Saldo do periodo</CardTitle>
             <CardValue $variant="default">
               {formatCurrency(dashboard.balance.balance)}
             </CardValue>

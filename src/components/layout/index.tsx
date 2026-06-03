@@ -33,6 +33,12 @@ const menuItems = [
   { path: '/configuracoes', icon: '⚙️', label: 'Configurações' },
 ];
 
+const roleLabels = {
+  ADMIN: 'Administrador',
+  TREASURER: 'Tesoureiro',
+  PASTOR: 'Pastor',
+};
+
 type LayoutProps = {
   children: React.ReactNode;
   title: string;
@@ -88,9 +94,7 @@ export function Layout({ children, title }: LayoutProps) {
           <TopBarTitle>{title}</TopBarTitle>
           <UserInfo>
             <UserName>{user?.name}</UserName>
-            <UserRole>
-              {user?.role === 'ADMIN' ? 'Administrador' : 'Pastor'}
-            </UserRole>
+            <UserRole>{user ? roleLabels[user.role] : ''}</UserRole>
           </UserInfo>
         </TopBar>
 

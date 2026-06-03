@@ -30,6 +30,7 @@ export type Expense = {
 
 export type Dashboard = {
   balance: Balance;
+  cashBalance: Balance;
   expenses: Expense[];
 };
 
@@ -85,5 +86,5 @@ export type User = {
   id: string;
   name: string;
   email: string;
-  role: 'ADMIN' | 'PASTOR';
+  role: 'ADMIN' | 'TREASURER' | 'PASTOR';
 };

@@ -64,10 +64,10 @@ export function TransacoesPage() {
   const [filterTitle, setFilterTitle] = useState('');
   const [filterCategory, setFilterCategory] = useState('');
   const [filterBegin, setFilterBegin] = useState(
-    dayjs().startOf('month').format('DD/MM/YYYY'),
+    dayjs().startOf('month').format('YYYY-MM-DD'),
   );
   const [filterEnd, setFilterEnd] = useState(
-    dayjs().endOf('month').format('DD/MM/YYYY'),
+    dayjs().endOf('month').format('YYYY-MM-DD'),
   );
 
   const {
@@ -118,7 +118,7 @@ export function TransacoesPage() {
       title: '',
       amount: '',
       type: 'income',
-      date: dayjs().format('DD/MM/YYYY'),
+      date: dayjs().format('YYYY-MM-DD'),
       categoryId: '',
     });
     setModalOpen(true);
@@ -129,7 +129,7 @@ export function TransacoesPage() {
     setValue('title', transaction.title);
     setValue('amount', (transaction.amount / 100).toFixed(2).replace('.', ','));
     setValue('type', transaction.type);
-    setValue('date', dayjs(transaction.date).format('DD/MM/YYYY'));
+    setValue('date', dayjs(transaction.date).format('YYYY-MM-DD'));
     setValue('categoryId', transaction.category._id);
     setModalOpen(true);
   };
@@ -176,21 +176,21 @@ export function TransacoesPage() {
           <FilterGroup>
             <FilterLabel>Início</FilterLabel>
             <FilterInput
+              type="date"
               value={filterBegin}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                 setFilterBegin(e.target.value)
               }
-              placeholder="dd/mm/aaaa"
             />
           </FilterGroup>
           <FilterGroup>
             <FilterLabel>Fim</FilterLabel>
             <FilterInput
+              type="date"
               value={filterEnd}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                 setFilterEnd(e.target.value)
               }
-              placeholder="dd/mm/aaaa"
             />
           </FilterGroup>
           <FilterGroup>
@@ -325,7 +325,7 @@ export function TransacoesPage() {
               <InputGroup>
                 <Label>Data</Label>
                 <Input
-                  placeholder="dd/mm/aaaa"
+                  type="date"
                   {...register('date')}
                   $hasError={!!errors.date}
                 />

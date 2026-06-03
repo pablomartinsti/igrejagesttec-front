@@ -2,9 +2,13 @@ import styled from 'styled-components';
 
 export const CardsGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 1rem;
   margin-bottom: 1.5rem;
+
+  @media (max-width: 1280px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
 
   @media (max-width: 1024px) {
     grid-template-columns: repeat(2, 1fr);
@@ -15,7 +19,9 @@ export const CardsGrid = styled.div`
   }
 `;
 
-export const Card = styled.div<{ $variant: 'default' | 'income' | 'expense' }>`
+export const Card = styled.div<{
+  $variant: 'default' | 'cash' | 'income' | 'expense';
+}>`
   background: white;
   border-radius: 0.75rem;
   padding: 1.25rem;
@@ -25,7 +31,9 @@ export const Card = styled.div<{ $variant: 'default' | 'income' | 'expense' }>`
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.07);
   border-left: 4px solid
     ${({ $variant }) =>
-      $variant === 'income'
+      $variant === 'cash'
+        ? '#1A3C2B'
+        : $variant === 'income'
         ? '#10B981'
         : $variant === 'expense'
           ? '#EF4444'
@@ -43,12 +51,14 @@ export const CardTitle = styled.div`
 `;
 
 export const CardValue = styled.div<{
-  $variant: 'default' | 'income' | 'expense';
+  $variant: 'default' | 'cash' | 'income' | 'expense';
 }>`
   font-size: 1.5rem;
   font-weight: 700;
   color: ${({ $variant }) =>
-    $variant === 'income'
+    $variant === 'cash'
+      ? '#1A3C2B'
+      : $variant === 'income'
       ? '#10B981'
       : $variant === 'expense'
         ? '#EF4444'
