@@ -104,14 +104,6 @@ export function DashboardPage() {
           endDate: formattedEndDate,
         });
 
-        console.log('RETORNO DASHBOARD:', {
-          selectedBeginDate,
-          selectedEndDate,
-          formattedBeginDate,
-          formattedEndDate,
-          data,
-        });
-
         if (requestId !== dashboardRequestRef.current) {
           return;
         }
