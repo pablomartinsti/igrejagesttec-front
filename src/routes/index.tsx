@@ -6,9 +6,11 @@ import { CategoriasPage } from '../pages/categorias';
 import { TransacoesPage } from '../pages/transacoes';
 import { CultosPage } from '../pages/cultos';
 import { CultoDetalhePage } from '../pages/culto-detalhe';
+import { RelatoriosPage } from '../pages/relatorios';
+import { ConfiguracoesPage } from '../pages/configuracoes';
 
 export function AppRoutes() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
 
   return (
     <Routes>
@@ -42,6 +44,24 @@ export function AppRoutes() {
         path="/cultos/:id"
         element={
           isAuthenticated ? <CultoDetalhePage /> : <Navigate to="/login" />
+        }
+      />
+      <Route
+        path="/relatorios"
+        element={
+          isAuthenticated ? <RelatoriosPage /> : <Navigate to="/login" />
+        }
+      />
+      <Route
+        path="/configuracoes"
+        element={
+          !isAuthenticated ? (
+            <Navigate to="/login" />
+          ) : user?.role === 'ADMIN' ? (
+            <ConfiguracoesPage />
+          ) : (
+            <Navigate to="/dashboard" />
+          )
         }
       />
       <Route

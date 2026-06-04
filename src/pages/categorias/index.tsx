@@ -38,7 +38,8 @@ type CategoryFormData = z.infer<typeof categorySchema>;
 
 export function CategoriasPage() {
   const { user } = useAuth();
-  const isAdmin = user?.role === 'ADMIN';
+  const canManage = user?.role === 'ADMIN' || user?.role === 'TREASURER';
+  const canDelete = user?.role === 'ADMIN';
 
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
@@ -115,7 +116,7 @@ export function CategoriasPage() {
 
   return (
     <Layout title="Categorias">
-      {isAdmin && (
+      {canManage && (
         <PageHeader>
           <AddButton onClick={openCreate}>+ Nova categoria</AddButton>
         </PageHeader>
@@ -131,7 +132,7 @@ export function CategoriasPage() {
             <tr>
               <Th>Cor</Th>
               <Th>Título</Th>
-              {isAdmin && <Th>Ações</Th>}
+              {(canManage || canDelete) && <Th>Ações</Th>}
             </tr>
           </thead>
           <tbody>
@@ -141,21 +142,25 @@ export function CategoriasPage() {
                   <ColorBadge $color={category.color} />
                 </Td>
                 <Td>{category.title}</Td>
-                {isAdmin && (
+                {(canManage || canDelete) && (
                   <Td>
-                    <ActionButton
-                      $variant="edit"
-                      onClick={() => openEdit(category)}
-                    >
+                    {canManage && (
+                      <ActionButton
+                        $variant="edit"
+                        onClick={() => openEdit(category)}
+                      >
                       ✏️ Editar
-                    </ActionButton>
-                    <ActionButton
-                      $variant="delete"
-                      onClick={() => handleDelete(category._id)}
-                      disabled={deleting === category._id}
-                    >
+                      </ActionButton>
+                    )}
+                    {canDelete && (
+                      <ActionButton
+                        $variant="delete"
+                        onClick={() => handleDelete(category._id)}
+                        disabled={deleting === category._id}
+                      >
                       🗑️ Deletar
-                    </ActionButton>
+                      </ActionButton>
+                    )}
                   </Td>
                 )}
               </tr>

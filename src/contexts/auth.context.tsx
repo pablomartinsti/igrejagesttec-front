@@ -6,17 +6,13 @@ import {
   ReactNode,
 } from 'react';
 import { api } from '../services/api';
+import { Church } from '../services/api-types';
 
 type User = {
   id: string;
   name: string;
   email: string;
   role: 'ADMIN' | 'TREASURER' | 'PASTOR';
-};
-
-type Church = {
-  id: string;
-  name: string;
 };
 
 type AuthContextData = {
@@ -26,6 +22,7 @@ type AuthContextData = {
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
+  updateChurch: (church: Church) => void;
 };
 
 const AuthContext = createContext({} as AuthContextData);
@@ -72,6 +69,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setChurch(null);
   }, []);
 
+  const updateChurch = useCallback((updatedChurch: Church) => {
+    localStorage.setItem(
+      '@igrejagesttec:church',
+      JSON.stringify(updatedChurch),
+    );
+    setChurch(updatedChurch);
+  }, []);
+
   return (
     <AuthContext.Provider
       value={{
@@ -81,6 +86,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isAuthenticated: !!token,
         login,
         logout,
+        updateChurch,
       }}
     >
       {children}

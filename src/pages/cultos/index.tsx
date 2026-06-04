@@ -61,7 +61,8 @@ type CultoCategoryFormData = z.infer<typeof cultoCategorySchema>;
 export function CultosPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const isAdmin = user?.role === 'ADMIN';
+  const canManage = user?.role === 'ADMIN' || user?.role === 'TREASURER';
+  const canDelete = user?.role === 'ADMIN';
 
   const [cultos, setCultos] = useState<Culto[]>([]);
   const [categories, setCategories] = useState<CultoCategory[]>([]);
@@ -183,7 +184,7 @@ export function CultosPage() {
 
   return (
     <Layout title="Cultos">
-      {isAdmin && (
+      {canManage && (
         <PageHeader>
           <HeaderActions>
             <SecondaryButton onClick={() => setCategoryModalOpen(true)}>
@@ -225,7 +226,7 @@ export function CultosPage() {
                 <DetailButton onClick={() => navigate(`/cultos/${culto.id}`)}>
                   Ver detalhes
                 </DetailButton>
-                {isAdmin && (
+                {canManage && (
                   <>
                     <ActionButton
                       $variant="edit"
@@ -233,12 +234,14 @@ export function CultosPage() {
                     >
                       ✏️
                     </ActionButton>
-                    <ActionButton
-                      $variant="delete"
-                      onClick={() => handleDelete(culto.id)}
-                    >
+                    {canDelete && (
+                      <ActionButton
+                        $variant="delete"
+                        onClick={() => handleDelete(culto.id)}
+                      >
                       🗑️
-                    </ActionButton>
+                      </ActionButton>
+                    )}
                   </>
                 )}
               </CardActions>
@@ -327,7 +330,7 @@ export function CultosPage() {
               {categories.map(cat => (
                 <CategoryItem key={cat.id}>
                   <CategoryTitle>{cat.title}</CategoryTitle>
-                  {isAdmin && (
+                  {canDelete && (
                     <DeleteCategoryButton
                       onClick={() => handleDeleteCategory(cat.id)}
                     >

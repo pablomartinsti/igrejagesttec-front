@@ -119,7 +119,8 @@ export function CultoDetalhePage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const isAdmin = user?.role === 'ADMIN';
+  const canManage = user?.role === 'ADMIN' || user?.role === 'TREASURER';
+  const canDelete = user?.role === 'ADMIN';
 
   const [culto, setCulto] = useState<Culto | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -362,7 +363,7 @@ export function CultoDetalhePage() {
             {culto.preacher ? ` - Pregador: ${culto.preacher}` : ''}
           </CultoSubtitle>
         </HeaderInfo>
-        {isAdmin && (
+        {canManage && (
           <HeaderActions>
             <SecondaryButton onClick={() => setActiveModal('spiritualCategory')}>
               Categoria espiritual
@@ -425,7 +426,7 @@ export function CultoDetalhePage() {
                     <Th>Nome</Th>
                     <Th>Tipo</Th>
                     <Th>Valor</Th>
-                    {isAdmin && <Th>Acoes</Th>}
+                    {canDelete && <Th>Acoes</Th>}
                   </tr>
                 </thead>
                 <tbody>
@@ -438,7 +439,7 @@ export function CultoDetalhePage() {
                           {formatCurrency(dizimista.amount)}
                         </Amount>
                       </Td>
-                      {isAdmin && (
+                      {canDelete && (
                         <Td>
                           <DeleteButton
                             onClick={() => handleRemoveDizimista(dizimista.id)}
@@ -471,7 +472,7 @@ export function CultoDetalhePage() {
                   <tr>
                     <Th>Categoria</Th>
                     <Th>Valor</Th>
-                    {isAdmin && <Th>Acoes</Th>}
+                    {canDelete && <Th>Acoes</Th>}
                   </tr>
                 </thead>
                 <tbody>
@@ -479,7 +480,7 @@ export function CultoDetalhePage() {
                     <tr key={record.id}>
                       <Td>{record.category.title}</Td>
                       <Td>{record.value}</Td>
-                      {isAdmin && (
+                      {canDelete && (
                         <Td>
                           <DeleteButton
                             onClick={() =>
@@ -517,7 +518,7 @@ export function CultoDetalhePage() {
                     <Th>Categoria</Th>
                     <Th>Tipo</Th>
                     <Th>Valor</Th>
-                    {isAdmin && <Th>Acoes</Th>}
+                    {canDelete && <Th>Acoes</Th>}
                   </tr>
                 </thead>
                 <tbody>
@@ -542,7 +543,7 @@ export function CultoDetalhePage() {
                           {formatCurrency(transaction.amount)}
                         </Amount>
                       </Td>
-                      {isAdmin && (
+                      {canDelete && (
                         <Td>
                           <DeleteButton
                             onClick={() =>

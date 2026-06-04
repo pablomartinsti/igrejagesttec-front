@@ -53,7 +53,8 @@ type TransactionFormData = z.infer<typeof transactionSchema>;
 
 export function TransacoesPage() {
   const { user } = useAuth();
-  const isAdmin = user?.role === 'ADMIN';
+  const canManage = user?.role === 'ADMIN' || user?.role === 'TREASURER';
+  const canDelete = user?.role === 'ADMIN';
 
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -221,7 +222,7 @@ export function TransacoesPage() {
           </FilterGroup>
           <FilterButton onClick={fetchTransactions}>🔍 Filtrar</FilterButton>
         </FiltersRow>
-        {isAdmin && (
+        {canManage && (
           <AddButton onClick={openCreate}>+ Nova transação</AddButton>
         )}
       </PageHeader>
@@ -239,7 +240,7 @@ export function TransacoesPage() {
               <Th>Categoria</Th>
               <Th>Tipo</Th>
               <Th>Valor</Th>
-              {isAdmin && <Th>Ações</Th>}
+              {(canManage || canDelete) && <Th>Ações</Th>}
             </tr>
           </thead>
           <tbody>
@@ -263,17 +264,21 @@ export function TransacoesPage() {
                     {formatCurrency(t.amount)}
                   </AmountCell>
                 </Td>
-                {isAdmin && (
+                {(canManage || canDelete) && (
                   <Td>
-                    <ActionButton $variant="edit" onClick={() => openEdit(t)}>
+                    {canManage && (
+                      <ActionButton $variant="edit" onClick={() => openEdit(t)}>
                       ✏️
-                    </ActionButton>
-                    <ActionButton
-                      $variant="delete"
-                      onClick={() => handleDelete(t._id)}
-                    >
+                      </ActionButton>
+                    )}
+                    {canDelete && (
+                      <ActionButton
+                        $variant="delete"
+                        onClick={() => handleDelete(t._id)}
+                      >
                       🗑️
-                    </ActionButton>
+                      </ActionButton>
+                    )}
                   </Td>
                 )}
               </tr>

@@ -49,6 +49,9 @@ export function Layout({ children, title }: LayoutProps) {
   const navigate = useNavigate();
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const visibleMenuItems = menuItems.filter(
+    item => item.path !== '/configuracoes' || user?.role === 'ADMIN',
+  );
 
   const handleLogout = () => {
     logout();
@@ -66,7 +69,7 @@ export function Layout({ children, title }: LayoutProps) {
         </SidebarHeader>
 
         <SidebarNav>
-          {menuItems.map(item => (
+          {visibleMenuItems.map(item => (
             <NavItem
               key={item.path}
               $active={location.pathname === item.path}

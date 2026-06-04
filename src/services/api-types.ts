@@ -87,4 +87,19 @@ export type User = {
   name: string;
   email: string;
   role: 'ADMIN' | 'TREASURER' | 'PASTOR';
+  createdAt?: string;
+};
+
+export type Church = {
+  id: string;
+  name: string;
+  cnpj?: string | null;
+  street?: string | null;
+  neighborhood?: string | null;
+  city?: string | null;
+  state?: string | null;
+  zipCode?: string | null;
+  phone?: string | null;
+  email?: string | null;
+  responsibleName?: string | null;
 };
