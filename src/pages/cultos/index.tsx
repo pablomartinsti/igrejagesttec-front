@@ -8,7 +8,11 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import dayjs from 'dayjs';
-import { formatDate } from '../../utils/format-date';
+import {
+  formatDate,
+  formatDateDisplay,
+  formatDateInput,
+} from '../../utils/format-date';
 import {
   PageHeader,
   HeaderActions,
@@ -124,7 +128,7 @@ export function CultosPage() {
 
   const openEdit = (culto: Culto) => {
     setEditing(culto);
-    setValue('date', dayjs(culto.date).format('YYYY-MM-DD'));
+    setValue('date', formatDateInput(culto.date));
     setValue('categoryId', culto.categoryId);
     setValue('preacher', culto.preacher || '');
     setModalOpen(true);
@@ -203,7 +207,7 @@ export function CultosPage() {
         <CultosGrid>
           {cultos.map(culto => (
             <CultoCard key={culto.id}>
-              <CultoDate>{dayjs(culto.date).format('DD/MM/YYYY')}</CultoDate>
+              <CultoDate>{formatDateDisplay(culto.date)}</CultoDate>
               <CultoType>{culto.category.title}</CultoType>
               {culto.preacher && (
                 <CultoPreacher>Pregador: {culto.preacher}</CultoPreacher>

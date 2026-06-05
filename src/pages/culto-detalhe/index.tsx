@@ -16,7 +16,7 @@ import {
   Transaction,
 } from '../../services/api-types';
 import { formatCurrency } from '../../utils/format-currency';
-import { formatDate } from '../../utils/format-date';
+import { formatDate, formatDateDisplay } from '../../utils/format-date';
 import {
   Amount,
   BackButton,
@@ -359,7 +359,7 @@ export function CultoDetalhePage() {
           </BackButton>
           <CultoTitle>{culto.category.title}</CultoTitle>
           <CultoSubtitle>
-            {dayjs(culto.date).format('DD/MM/YYYY')}
+            {formatDateDisplay(culto.date)}
             {culto.preacher ? ` - Pregador: ${culto.preacher}` : ''}
           </CultoSubtitle>
         </HeaderInfo>
@@ -524,7 +524,7 @@ export function CultoDetalhePage() {
                 <tbody>
                   {culto.transactions.map(transaction => (
                     <tr key={getTransactionId(transaction)}>
-                      <Td>{dayjs(transaction.date).format('DD/MM/YYYY')}</Td>
+                      <Td>{formatDateDisplay(transaction.date)}</Td>
                       <Td>{transaction.title}</Td>
                       <Td>
                         <CategoryBadge $color={transaction.category.color}>

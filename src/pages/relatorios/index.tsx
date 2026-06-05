@@ -6,7 +6,7 @@ import { CultosService } from '../../services/cultos.service';
 import { TransactionsService } from '../../services/transactions.service';
 import { Culto, Transaction } from '../../services/api-types';
 import { formatCurrency } from '../../utils/format-currency';
-import { formatDate } from '../../utils/format-date';
+import { formatDate, formatDateDisplay } from '../../utils/format-date';
 import {
   ButtonGroup,
   CategoryName,
@@ -51,7 +51,7 @@ function getTransactionId(transaction: Transaction) {
 }
 
 function isBetween(date: string, beginDate: string, endDate: string) {
-  const value = dayjs(date).valueOf();
+  const value = dayjs(formatDate(date)).valueOf();
   return (
     value >= dayjs(beginDate).startOf('day').valueOf() &&
     value <= dayjs(endDate).endOf('day').valueOf()
@@ -59,7 +59,9 @@ function isBetween(date: string, beginDate: string, endDate: string) {
 }
 
 function isBefore(date: string, beginDate: string) {
-  return dayjs(date).valueOf() < dayjs(beginDate).startOf('day').valueOf();
+  return (
+    dayjs(formatDate(date)).valueOf() < dayjs(beginDate).startOf('day').valueOf()
+  );
 }
 
 function sumTransactions(transactions: Transaction[], type: 'income' | 'expense') {
@@ -122,7 +124,11 @@ export function RelatoriosPage() {
     );
     const periodCultos = cultos
       .filter(culto => isBetween(culto.date, normalizedBeginDate, normalizedEndDate))
-      .sort((a, b) => dayjs(a.date).valueOf() - dayjs(b.date).valueOf());
+      .sort(
+        (a, b) =>
+          dayjs(formatDate(a.date)).valueOf() -
+          dayjs(formatDate(b.date)).valueOf(),
+      );
     const previousCultos = cultos.filter(culto =>
       isBefore(culto.date, normalizedBeginDate),
     );
@@ -261,8 +267,8 @@ export function RelatoriosPage() {
       <ReportHeader>
         <ReportTitle>Relatorio Geral</ReportTitle>
         <ReportSubtitle>
-          Periodo de {dayjs(beginDate).format('DD/MM/YYYY')} ate{' '}
-          {dayjs(endDate).format('DD/MM/YYYY')}
+          Periodo de {formatDateDisplay(beginDate)} ate{' '}
+          {formatDateDisplay(endDate)}
         </ReportSubtitle>
       </ReportHeader>
 
@@ -409,7 +415,7 @@ export function RelatoriosPage() {
                     <tbody>
                       {report.cultoRows.map(culto => (
                         <tr key={culto.id}>
-                          <Td>{dayjs(culto.date).format('DD/MM/YYYY')}</Td>
+                          <Td>{formatDateDisplay(culto.date)}</Td>
                           <Td>{culto.title}</Td>
                           <Td>{culto.preacher}</Td>
                           <Td $align="right">
@@ -459,7 +465,7 @@ export function RelatoriosPage() {
                     <tbody>
                       {report.looseTransactions.map(transaction => (
                         <tr key={getTransactionId(transaction)}>
-                          <Td>{dayjs(transaction.date).format('DD/MM/YYYY')}</Td>
+                          <Td>{formatDateDisplay(transaction.date)}</Td>
                           <Td>{transaction.title}</Td>
                           <Td>
                             <CategoryName $color={transaction.category.color}>

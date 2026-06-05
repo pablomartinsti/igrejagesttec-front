@@ -9,7 +9,11 @@ import { CategoriesService } from '../../services/categories.service';
 import { Transaction, Category } from '../../services/api-types';
 import { useAuth } from '../../contexts/auth.context';
 import { formatCurrency } from '../../utils/format-currency';
-import { formatDate } from '../../utils/format-date';
+import {
+  formatDate,
+  formatDateDisplay,
+  formatDateInput,
+} from '../../utils/format-date';
 import {
   PageHeader,
   FiltersRow,
@@ -130,7 +134,7 @@ export function TransacoesPage() {
     setValue('title', transaction.title);
     setValue('amount', (transaction.amount / 100).toFixed(2).replace('.', ','));
     setValue('type', transaction.type);
-    setValue('date', dayjs(transaction.date).format('YYYY-MM-DD'));
+    setValue('date', formatDateInput(transaction.date));
     setValue('categoryId', transaction.category._id);
     setModalOpen(true);
   };
@@ -246,7 +250,7 @@ export function TransacoesPage() {
           <tbody>
             {transactions.map(t => (
               <tr key={t._id}>
-                <Td>{dayjs(t.date).format('DD/MM/YYYY')}</Td>
+                <Td>{formatDateDisplay(t.date)}</Td>
                 <Td>{t.title}</Td>
                 <Td>
                   <CategoryBadge $color={t.category.color}>
