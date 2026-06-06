@@ -3,7 +3,6 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import dayjs from 'dayjs';
 import { Layout } from '../../components/layout';
 import { useAuth } from '../../contexts/auth.context';
 import { CultosService } from '../../services/cultos.service';
@@ -76,7 +75,6 @@ const transactionSchema = z.object({
   title: z.string().min(1, 'Titulo obrigatorio'),
   amount: amountSchema,
   type: z.enum(['income', 'expense']),
-  date: z.string().min(1, 'Data obrigatoria'),
   categoryId: z.string().min(1, 'Categoria obrigatoria'),
 });
 
@@ -150,7 +148,6 @@ export function CultoDetalhePage() {
     resolver: zodResolver(transactionSchema),
     defaultValues: {
       type: 'income',
-      date: dayjs().format('YYYY-MM-DD'),
     },
   });
 
@@ -250,14 +247,14 @@ export function CultoDetalhePage() {
   };
 
   const onSubmitTransaction = async (data: TransactionFormData) => {
-    if (!id) return;
+    if (!id || !culto) return;
     try {
       setSaving(true);
       await TransactionsService.create({
         title: data.title,
         amount: parseAmountToCents(data.amount),
         type: data.type,
-        date: formatDate(data.date),
+        date: formatDate(culto.date),
         categoryId: data.categoryId,
         cultoId: id,
       });
@@ -265,7 +262,6 @@ export function CultoDetalhePage() {
         title: '',
         amount: '',
         type: 'income',
-        date: dayjs().format('YYYY-MM-DD'),
         categoryId: '',
       });
       closeModal();
@@ -641,17 +637,6 @@ export function CultoDetalhePage() {
                   <option value="income">Entrada</option>
                   <option value="expense">Saida</option>
                 </Select>
-              </InputGroup>
-              <InputGroup>
-                <Label>Data</Label>
-                <Input
-                  type="date"
-                  {...registerTransaction('date')}
-                  $hasError={!!errorsTransaction.date}
-                />
-                {errorsTransaction.date && (
-                  <ErrorMessage>{errorsTransaction.date.message}</ErrorMessage>
-                )}
               </InputGroup>
               <InputGroup>
                 <Label>Categoria financeira</Label>
