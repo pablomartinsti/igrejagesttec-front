@@ -65,12 +65,6 @@ const amountSchema = z
     message: 'Valor invalido',
   });
 
-const dizimistaSchema = z.object({
-  name: z.string().optional(),
-  amount: amountSchema,
-  contributionType: z.string().optional(),
-});
-
 const transactionSchema = z.object({
   title: z.string().min(1, 'Titulo obrigatorio'),
   amount: amountSchema,
@@ -90,11 +84,10 @@ const spiritualCategorySchema = z.object({
   title: z.string().min(1, 'Titulo obrigatorio'),
 });
 
-type DizimistaFormData = z.infer<typeof dizimistaSchema>;
 type TransactionFormData = z.infer<typeof transactionSchema>;
 type SpiritualRecordFormData = z.infer<typeof spiritualRecordSchema>;
 type SpiritualCategoryFormData = z.infer<typeof spiritualCategorySchema>;
-type ModalType = 'dizimista' | 'transaction' | 'spiritual' | 'spiritualCategory';
+type ModalType = 'transaction' | 'spiritual' | 'spiritualCategory';
 
 function parseAmountToCents(value: string) {
   const normalized = value
@@ -129,15 +122,8 @@ export function CultoDetalhePage() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [activeModal, setActiveModal] = useState<ModalType | null>(null);
-
-  const {
-    register: registerDizimista,
-    handleSubmit: handleSubmitDizimista,
-    reset: resetDizimista,
-    formState: { errors: errorsDizimista },
-  } = useForm<DizimistaFormData>({
-    resolver: zodResolver(dizimistaSchema),
-  });
+  const [editingSpiritualCategory, setEditingSpiritualCategory] =
+    useState<SpiritualCategory | null>(null);
 
   const {
     register: registerTransaction,
@@ -164,6 +150,7 @@ export function CultoDetalhePage() {
     register: registerSpiritualCategory,
     handleSubmit: handleSubmitSpiritualCategory,
     reset: resetSpiritualCategory,
+    setValue: setSpiritualCategoryValue,
     formState: { errors: errorsSpiritualCategory },
   } = useForm<SpiritualCategoryFormData>({
     resolver: zodResolver(spiritualCategorySchema),
@@ -203,8 +190,6 @@ export function CultoDetalhePage() {
   }, [fetchCulto, fetchSupportData]);
 
   const totals = useMemo(() => {
-    const totalDizimos =
-      culto?.dizimistas.reduce((acc, item) => acc + item.amount, 0) || 0;
     const totalEntradas =
       culto?.transactions
         .filter(transaction => transaction.type === 'income')
@@ -215,35 +200,17 @@ export function CultoDetalhePage() {
         .reduce((acc, transaction) => acc + transaction.amount, 0) || 0;
 
     return {
-      totalDizimos,
       totalEntradas,
       totalSaidas,
-      saldo: totalDizimos + totalEntradas - totalSaidas,
+      saldo: totalEntradas - totalSaidas,
     };
   }, [culto]);
 
   const closeModal = () => {
     setActiveModal(null);
+    setEditingSpiritualCategory(null);
+    resetSpiritualCategory();
     setSaving(false);
-  };
-
-  const onSubmitDizimista = async (data: DizimistaFormData) => {
-    if (!id) return;
-    try {
-      setSaving(true);
-      await CultosService.addDizimista(id, {
-        name: data.name || undefined,
-        contributionType: data.contributionType || undefined,
-        amount: parseAmountToCents(data.amount),
-      });
-      resetDizimista();
-      closeModal();
-      await fetchCulto();
-    } catch {
-      alert('Erro ao salvar dizimista.');
-    } finally {
-      setSaving(false);
-    }
   };
 
   const onSubmitTransaction = async (data: TransactionFormData) => {
@@ -296,21 +263,37 @@ export function CultoDetalhePage() {
   ) => {
     try {
       setSaving(true);
-      await CultosService.createSpiritualCategory(data.title);
+      if (editingSpiritualCategory) {
+        await CultosService.updateSpiritualCategory(
+          editingSpiritualCategory.id,
+          data.title,
+        );
+      } else {
+        await CultosService.createSpiritualCategory(data.title);
+      }
+      setEditingSpiritualCategory(null);
       resetSpiritualCategory();
       await fetchSupportData();
-      closeModal();
     } catch {
-      alert('Erro ao criar categoria espiritual.');
+      alert('Erro ao salvar categoria espiritual.');
     } finally {
       setSaving(false);
     }
   };
 
-  const handleRemoveDizimista = async (dizimistaId: string) => {
-    if (!id || !confirm('Remover este lancamento de dizimo/oferta?')) return;
-    await CultosService.removeDizimista(id, dizimistaId);
-    await fetchCulto();
+  const handleEditSpiritualCategory = (category: SpiritualCategory) => {
+    setEditingSpiritualCategory(category);
+    setSpiritualCategoryValue('title', category.title);
+  };
+
+  const handleDeleteSpiritualCategory = async (categoryId: string) => {
+    if (!confirm('Excluir esta categoria espiritual?')) return;
+    try {
+      await CultosService.deleteSpiritualCategory(categoryId);
+      await fetchSupportData();
+    } catch {
+      alert('Nao foi possivel excluir. Verifique se existem registros vinculados.');
+    }
   };
 
   const handleRemoveTransaction = async (transactionId: string) => {
@@ -370,9 +353,6 @@ export function CultoDetalhePage() {
             <PrimaryButton onClick={() => setActiveModal('transaction')}>
               Lancamento
             </PrimaryButton>
-            <PrimaryButton onClick={() => setActiveModal('dizimista')}>
-              Dizimo/oferta
-            </PrimaryButton>
           </HeaderActions>
         )}
       </Header>
@@ -380,12 +360,6 @@ export function CultoDetalhePage() {
       {error && <ErrorState>{error}</ErrorState>}
 
       <SummaryGrid>
-        <SummaryCard $variant="income">
-          <SummaryLabel>Dizimos e ofertas</SummaryLabel>
-          <SummaryValue $variant="income">
-            {formatCurrency(totals.totalDizimos)}
-          </SummaryValue>
-        </SummaryCard>
         <SummaryCard $variant="income">
           <SummaryLabel>Entradas</SummaryLabel>
           <SummaryValue $variant="income">
@@ -405,53 +379,6 @@ export function CultoDetalhePage() {
       </SummaryGrid>
 
       <ContentGrid>
-        <SectionCard>
-          <SectionHeader>
-            <div>
-              <SectionTitle>Dizimos e ofertas</SectionTitle>
-              <SectionSubtitle>Contribuicoes registradas no culto</SectionSubtitle>
-            </div>
-          </SectionHeader>
-          {culto.dizimistas.length === 0 ? (
-            <EmptyState>Nenhum dizimo ou oferta registrado.</EmptyState>
-          ) : (
-            <TableWrapper>
-              <Table>
-                <thead>
-                  <tr>
-                    <Th>Nome</Th>
-                    <Th>Tipo</Th>
-                    <Th>Valor</Th>
-                    {canDelete && <Th>Acoes</Th>}
-                  </tr>
-                </thead>
-                <tbody>
-                  {culto.dizimistas.map(dizimista => (
-                    <tr key={dizimista.id}>
-                      <Td>{dizimista.name || 'Nao informado'}</Td>
-                      <Td>{dizimista.contributionType || 'Geral'}</Td>
-                      <Td>
-                        <Amount $variant="income">
-                          {formatCurrency(dizimista.amount)}
-                        </Amount>
-                      </Td>
-                      {canDelete && (
-                        <Td>
-                          <DeleteButton
-                            onClick={() => handleRemoveDizimista(dizimista.id)}
-                          >
-                            Remover
-                          </DeleteButton>
-                        </Td>
-                      )}
-                    </tr>
-                  ))}
-                </tbody>
-              </Table>
-            </TableWrapper>
-          )}
-        </SectionCard>
-
         <SectionCard>
           <SectionHeader>
             <div>
@@ -560,49 +487,6 @@ export function CultoDetalhePage() {
           )}
         </SectionCard>
       </ContentGrid>
-
-      {activeModal === 'dizimista' && (
-        <ModalOverlay onClick={closeModal}>
-          <Modal onClick={event => event.stopPropagation()}>
-            <ModalTitle>Novo dizimo/oferta</ModalTitle>
-            <Form onSubmit={handleSubmitDizimista(onSubmitDizimista)}>
-              <InputGroup>
-                <Label>Nome</Label>
-                <Input
-                  placeholder="Nome do contribuinte"
-                  {...registerDizimista('name')}
-                />
-              </InputGroup>
-              <InputGroup>
-                <Label>Tipo</Label>
-                <Input
-                  placeholder="Ex: Dizimo, Oferta, Primicia"
-                  {...registerDizimista('contributionType')}
-                />
-              </InputGroup>
-              <InputGroup>
-                <Label>Valor</Label>
-                <Input
-                  placeholder="0,00"
-                  {...registerDizimista('amount')}
-                  $hasError={!!errorsDizimista.amount}
-                />
-                {errorsDizimista.amount && (
-                  <ErrorMessage>{errorsDizimista.amount.message}</ErrorMessage>
-                )}
-              </InputGroup>
-              <ModalButtons>
-                <CancelButton type="button" onClick={closeModal}>
-                  Cancelar
-                </CancelButton>
-                <PrimaryButton type="submit" disabled={saving}>
-                  Salvar
-                </PrimaryButton>
-              </ModalButtons>
-            </Form>
-          </Modal>
-        </ModalOverlay>
-      )}
 
       {activeModal === 'transaction' && (
         <ModalOverlay onClick={closeModal}>
@@ -724,7 +608,7 @@ export function CultoDetalhePage() {
       {activeModal === 'spiritualCategory' && (
         <ModalOverlay onClick={closeModal}>
           <Modal onClick={event => event.stopPropagation()}>
-            <ModalTitle>Nova categoria espiritual</ModalTitle>
+            <ModalTitle>Categorias espirituais</ModalTitle>
             <Form
               onSubmit={handleSubmitSpiritualCategory(
                 onSubmitSpiritualCategory,
@@ -744,14 +628,58 @@ export function CultoDetalhePage() {
                 )}
               </InputGroup>
               <ModalButtons>
-                <CancelButton type="button" onClick={closeModal}>
-                  Cancelar
-                </CancelButton>
+                {editingSpiritualCategory && (
+                  <CancelButton
+                    type="button"
+                    onClick={() => {
+                      setEditingSpiritualCategory(null);
+                      resetSpiritualCategory();
+                    }}
+                  >
+                    Cancelar edicao
+                  </CancelButton>
+                )}
                 <PrimaryButton type="submit" disabled={saving}>
-                  Criar
+                  {editingSpiritualCategory ? 'Salvar alteracao' : 'Criar'}
                 </PrimaryButton>
               </ModalButtons>
             </Form>
+            <TableWrapper>
+              <Table>
+                <tbody>
+                  {spiritualCategories.map(category => (
+                    <tr key={category.id}>
+                      <Td>{category.title}</Td>
+                      <Td>
+                        <SecondaryButton
+                          type="button"
+                          onClick={() => handleEditSpiritualCategory(category)}
+                        >
+                          Editar
+                        </SecondaryButton>
+                      </Td>
+                      {canDelete && (
+                        <Td>
+                          <DeleteButton
+                            type="button"
+                            onClick={() =>
+                              handleDeleteSpiritualCategory(category.id)
+                            }
+                          >
+                            Excluir
+                          </DeleteButton>
+                        </Td>
+                      )}
+                    </tr>
+                  ))}
+                </tbody>
+              </Table>
+            </TableWrapper>
+            <ModalButtons>
+              <CancelButton type="button" onClick={closeModal}>
+                Fechar
+              </CancelButton>
+            </ModalButtons>
           </Modal>
         </ModalOverlay>
       )}

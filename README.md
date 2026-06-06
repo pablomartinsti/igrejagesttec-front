@@ -19,7 +19,7 @@ O frontend ja possui:
 - Cadastro e listagem de categorias de culto.
 - Cadastro e listagem de cultos.
 - Tela de detalhes do culto.
-- Lancamento de dizimos/ofertas no culto.
+- Lancamentos financeiros vinculados ao culto, incluindo dizimos e ofertas.
 - Lancamento financeiro vinculado ao culto.
 - Registros espirituais por culto.
 - Transacoes avulsas fora do culto.
@@ -142,7 +142,7 @@ src/pages/categorias/index.tsx
 | `/login` | Login | Publica |
 | `/dashboard` | Painel | Requer login |
 | `/cultos` | Cultos | Lista cultos e categorias de culto |
-| `/cultos/:id` | Detalhes do culto | Dizimos/ofertas, registros espirituais e lancamentos do culto |
+| `/cultos/:id` | Detalhes do culto | Registros espirituais e lancamentos financeiros do culto |
 | `/transacoes` | Transacoes | Lancamentos avulsos e filtros |
 | `/categorias` | Categorias financeiras | Categorias usadas em transacoes |
 | `/relatorios` | Relatorios | Resumo financeiro e espiritual |
@@ -158,7 +158,7 @@ Os arquivos em `src/services` concentram as chamadas para a API.
 | `api-types.ts` | Tipos compartilhados pelas telas |
 | `dashboard.service.ts` | Dashboard e evolucao financeira |
 | `categories.service.ts` | Categorias financeiras |
-| `cultos.service.ts` | Cultos, categorias de culto, dizimos/ofertas e registros espirituais |
+| `cultos.service.ts` | Cultos, categorias de culto, categorias e registros espirituais |
 | `transactions.service.ts` | Transacoes avulsas e vinculadas ao culto |
 | `churches.service.ts` | Dados da igreja |
 | `users.service.ts` | Usuarios |
@@ -205,7 +205,7 @@ styles.ts   # componentes styled-components da tela
 1. Criar categoria de culto em `Cultos > Categorias`.
 2. Criar culto informando data, categoria e pregador.
 3. Abrir `Ver detalhes`.
-4. Lancar dizimos/ofertas.
+4. Lancar dizimos e ofertas como entradas financeiras do culto.
 5. Lancar registros espirituais.
 6. Lancar transacao vinculada ao culto, se necessario.
 7. Conferir painel e relatorios.
@@ -279,7 +279,7 @@ Antes de apresentar para cliente:
 5. Criar categoria de culto.
 6. Criar culto.
 7. Entrar nos detalhes do culto.
-8. Lancar dizimo/oferta.
+8. Lancar dizimo/oferta usando a categoria financeira correspondente.
 9. Lancar registro espiritual.
 10. Lancar transacao avulsa.
 11. Verificar painel.

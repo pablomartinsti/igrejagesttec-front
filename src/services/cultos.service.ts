@@ -82,6 +82,21 @@ export const CultosService = {
     return data;
   },
 
+  async updateSpiritualCategory(
+    id: string,
+    title: string,
+  ): Promise<SpiritualCategory> {
+    const { data } = await api.put<SpiritualCategory>(
+      `/cultos/categorias-espirituais/${id}`,
+      { title },
+    );
+    return data;
+  },
+
+  async deleteSpiritualCategory(id: string): Promise<void> {
+    await api.delete(`/cultos/categorias-espirituais/${id}`);
+  },
+
   async getCultoCategories(): Promise<CultoCategory[]> {
     const { data } = await api.get<CultoCategory[]>('/cultos/categorias');
     return data;
@@ -89,6 +104,13 @@ export const CultosService = {
 
   async createCultoCategory(title: string): Promise<CultoCategory> {
     const { data } = await api.post<CultoCategory>('/cultos/categorias', {
+      title,
+    });
+    return data;
+  },
+
+  async updateCultoCategory(id: string, title: string): Promise<CultoCategory> {
+    const { data } = await api.put<CultoCategory>(`/cultos/categorias/${id}`, {
       title,
     });
     return data;

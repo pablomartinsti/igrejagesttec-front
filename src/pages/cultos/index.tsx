@@ -74,6 +74,9 @@ export function CultosPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [categoryModalOpen, setCategoryModalOpen] = useState(false);
   const [editing, setEditing] = useState<Culto | null>(null);
+  const [editingCategory, setEditingCategory] = useState<CultoCategory | null>(
+    null,
+  );
 
   const {
     register,
@@ -89,6 +92,7 @@ export function CultosPage() {
     register: registerCat,
     handleSubmit: handleSubmitCat,
     reset: resetCat,
+    setValue: setCategoryValue,
     formState: { errors: errorsCat },
   } = useForm<CultoCategoryFormData>({
     resolver: zodResolver(cultoCategorySchema),
@@ -168,12 +172,22 @@ export function CultosPage() {
 
   const onSubmitCategory = async (data: CultoCategoryFormData) => {
     try {
-      await CultosService.createCultoCategory(data.title);
+      if (editingCategory) {
+        await CultosService.updateCultoCategory(editingCategory.id, data.title);
+      } else {
+        await CultosService.createCultoCategory(data.title);
+      }
+      setEditingCategory(null);
       resetCat();
       await fetchCategories();
     } catch {
-      alert('Erro ao criar categoria.');
+      alert('Erro ao salvar categoria.');
     }
+  };
+
+  const handleEditCategory = (category: CultoCategory) => {
+    setEditingCategory(category);
+    setCategoryValue('title', category.title);
   };
 
   const handleDeleteCategory = async (id: string) => {
@@ -213,10 +227,6 @@ export function CultosPage() {
                 <CultoPreacher>Pregador: {culto.preacher}</CultoPreacher>
               )}
               <CultoStats>
-                <StatItem>
-                  <StatValue>{culto.dizimistas.length}</StatValue>
-                  <StatLabel>Dizimistas</StatLabel>
-                </StatItem>
                 <StatItem>
                   <StatValue>{culto.spiritualRecords.length}</StatValue>
                   <StatLabel>Registros</StatLabel>
@@ -328,12 +338,34 @@ export function CultosPage() {
                   </span>
                 )}
               </InputGroup>
-              <SubmitButton type="submit">+ Adicionar</SubmitButton>
+              <ModalButtons>
+                {editingCategory && (
+                  <CancelButton
+                    type="button"
+                    onClick={() => {
+                      setEditingCategory(null);
+                      resetCat();
+                    }}
+                  >
+                    Cancelar edicao
+                  </CancelButton>
+                )}
+                <SubmitButton type="submit">
+                  {editingCategory ? 'Salvar alteracao' : '+ Adicionar'}
+                </SubmitButton>
+              </ModalButtons>
             </Form>
             <CategoryList>
               {categories.map(cat => (
                 <CategoryItem key={cat.id}>
                   <CategoryTitle>{cat.title}</CategoryTitle>
+                  <ActionButton
+                    type="button"
+                    $variant="edit"
+                    onClick={() => handleEditCategory(cat)}
+                  >
+                    Editar
+                  </ActionButton>
                   {canDelete && (
                     <DeleteCategoryButton
                       onClick={() => handleDeleteCategory(cat.id)}

@@ -70,12 +70,6 @@ function sumTransactions(transactions: Transaction[], type: 'income' | 'expense'
     .reduce((acc, transaction) => acc + transaction.amount, 0);
 }
 
-function sumDizimos(cultos: Culto[]) {
-  return cultos
-    .flatMap(culto => culto.dizimistas)
-    .reduce((acc, dizimista) => acc + dizimista.amount, 0);
-}
-
 export function RelatoriosPage() {
   const [beginDate, setBeginDate] = useState(
     dayjs().startOf('month').format('YYYY-MM-DD'),
@@ -129,18 +123,11 @@ export function RelatoriosPage() {
           dayjs(formatDate(a.date)).valueOf() -
           dayjs(formatDate(b.date)).valueOf(),
       );
-    const previousCultos = cultos.filter(culto =>
-      isBefore(culto.date, normalizedBeginDate),
-    );
-
     const previousIncomes = sumTransactions(previousTransactions, 'income');
     const previousExpenses = sumTransactions(previousTransactions, 'expense');
-    const previousDizimos = sumDizimos(previousCultos);
-    const periodTransactionIncomes = sumTransactions(periodTransactions, 'income');
+    const periodIncomes = sumTransactions(periodTransactions, 'income');
     const periodExpenses = sumTransactions(periodTransactions, 'expense');
-    const periodDizimos = sumDizimos(periodCultos);
-    const periodIncomes = periodTransactionIncomes + periodDizimos;
-    const previousBalance = previousIncomes + previousDizimos - previousExpenses;
+    const previousBalance = previousIncomes - previousExpenses;
     const periodBalance = periodIncomes - periodExpenses;
     const finalBalance = previousBalance + periodBalance;
 
@@ -173,15 +160,6 @@ export function RelatoriosPage() {
       categoryMap.set(key, current);
     }
 
-    if (periodDizimos > 0) {
-      categoryMap.set('dizimos-cultos', {
-        title: 'Dizimos e ofertas dos cultos',
-        color: '#10B981',
-        incomes: periodDizimos,
-        expenses: 0,
-      });
-    }
-
     const spiritual = new Map<string, number>();
     for (const culto of periodCultos) {
       for (const record of culto.spiritualRecords) {
@@ -193,10 +171,6 @@ export function RelatoriosPage() {
     }
 
     const cultoRows = periodCultos.map(culto => {
-      const dizimos = culto.dizimistas.reduce(
-        (acc, dizimista) => acc + dizimista.amount,
-        0,
-      );
       const entradas = sumTransactions(culto.transactions, 'income');
 
       return {
@@ -204,9 +178,8 @@ export function RelatoriosPage() {
         date: culto.date,
         title: culto.category.title,
         preacher: culto.preacher || 'Nao informado',
-        dizimos,
         entradas,
-        totalArrecadado: dizimos + entradas,
+        totalArrecadado: entradas,
       };
     });
 
@@ -216,7 +189,6 @@ export function RelatoriosPage() {
       periodExpenses,
       periodBalance,
       finalBalance,
-      periodDizimos,
       periodCultos,
       looseTransactions,
       categoryRows: Array.from(categoryMap.values()).sort(
@@ -407,7 +379,6 @@ export function RelatoriosPage() {
                         <Th>Data</Th>
                         <Th>Culto</Th>
                         <Th>Pregador</Th>
-                        <Th>Dizimos/ofertas</Th>
                         <Th>Entradas</Th>
                         <Th>Total arrecadado</Th>
                       </tr>
@@ -418,11 +389,6 @@ export function RelatoriosPage() {
                           <Td>{formatDateDisplay(culto.date)}</Td>
                           <Td>{culto.title}</Td>
                           <Td>{culto.preacher}</Td>
-                          <Td $align="right">
-                            <Money $variant="income">
-                              {formatCurrency(culto.dizimos)}
-                            </Money>
-                          </Td>
                           <Td $align="right">
                             <Money $variant="income">
                               {formatCurrency(culto.entradas)}
