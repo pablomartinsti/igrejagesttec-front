@@ -379,7 +379,6 @@ export function RelatoriosPage() {
                         <Th>Data</Th>
                         <Th>Culto</Th>
                         <Th>Pregador</Th>
-                        <Th $align="right">Entradas</Th>
                         <Th $align="right">Total arrecadado</Th>
                       </tr>
                     </thead>
@@ -389,11 +388,6 @@ export function RelatoriosPage() {
                           <Td>{formatDateDisplay(culto.date)}</Td>
                           <Td>{culto.title}</Td>
                           <Td>{culto.preacher}</Td>
-                          <Td $align="right">
-                            <Money $variant="income">
-                              {formatCurrency(culto.entradas)}
-                            </Money>
-                          </Td>
                           <Td $align="right">
                             <Money $variant="income">
                               {formatCurrency(culto.totalArrecadado)}
