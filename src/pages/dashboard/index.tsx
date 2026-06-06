@@ -237,7 +237,7 @@ export function DashboardPage() {
           </div>
         </Card>
 
-        <Card $variant="default">
+        <Card $variant="default" hidden>
           <CardIcon>💰</CardIcon>
           <div>
             <CardTitle>Saldo do período</CardTitle>
