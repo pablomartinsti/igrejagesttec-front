@@ -355,12 +355,6 @@ export function CultoDetalhePage() {
       {error && <ErrorState>{error}</ErrorState>}
 
       <SummaryGrid>
-        <SummaryCard $variant="income">
-          <SummaryLabel>Entradas</SummaryLabel>
-          <SummaryValue $variant="income">
-            {formatCurrency(totals.totalEntradas)}
-          </SummaryValue>
-        </SummaryCard>
         <SummaryCard>
           <SummaryLabel>Saldo do culto</SummaryLabel>
           <SummaryValue>{formatCurrency(totals.saldo)}</SummaryValue>

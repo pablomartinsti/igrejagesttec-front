@@ -78,7 +78,7 @@ export const SecondaryButton = styled.button`
 
 export const SummaryGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 1fr);
   gap: 1rem;
   margin-bottom: 1.5rem;
 
