@@ -38,6 +38,10 @@ export const Card = styled.div<{
         : $variant === 'expense'
           ? '#EF4444'
           : '#3B82F6'};
+
+  &[hidden] {
+    display: none;
+  }
 `;
 
 export const CardIcon = styled.div`
