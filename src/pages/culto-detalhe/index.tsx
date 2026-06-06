@@ -361,12 +361,6 @@ export function CultoDetalhePage() {
             {formatCurrency(totals.totalEntradas)}
           </SummaryValue>
         </SummaryCard>
-        <SummaryCard $variant="expense">
-          <SummaryLabel>Saidas</SummaryLabel>
-          <SummaryValue $variant="expense">
-            {formatCurrency(totals.totalSaidas)}
-          </SummaryValue>
-        </SummaryCard>
         <SummaryCard>
           <SummaryLabel>Saldo do culto</SummaryLabel>
           <SummaryValue>{formatCurrency(totals.saldo)}</SummaryValue>
