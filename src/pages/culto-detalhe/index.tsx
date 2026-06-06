@@ -68,7 +68,6 @@ const amountSchema = z
 const transactionSchema = z.object({
   title: z.string().min(1, 'Titulo obrigatorio'),
   amount: amountSchema,
-  type: z.enum(['income', 'expense']),
   categoryId: z.string().min(1, 'Categoria obrigatoria'),
 });
 
@@ -132,9 +131,6 @@ export function CultoDetalhePage() {
     formState: { errors: errorsTransaction },
   } = useForm<TransactionFormData>({
     resolver: zodResolver(transactionSchema),
-    defaultValues: {
-      type: 'income',
-    },
   });
 
   const {
@@ -220,7 +216,7 @@ export function CultoDetalhePage() {
       await TransactionsService.create({
         title: data.title,
         amount: parseAmountToCents(data.amount),
-        type: data.type,
+        type: 'income',
         date: formatDate(culto.date),
         categoryId: data.categoryId,
         cultoId: id,
@@ -228,7 +224,6 @@ export function CultoDetalhePage() {
       resetTransaction({
         title: '',
         amount: '',
-        type: 'income',
         categoryId: '',
       });
       closeModal();
@@ -514,13 +509,6 @@ export function CultoDetalhePage() {
                 {errorsTransaction.amount && (
                   <ErrorMessage>{errorsTransaction.amount.message}</ErrorMessage>
                 )}
-              </InputGroup>
-              <InputGroup>
-                <Label>Tipo</Label>
-                <Select {...registerTransaction('type')}>
-                  <option value="income">Entrada</option>
-                  <option value="expense">Saida</option>
-                </Select>
               </InputGroup>
               <InputGroup>
                 <Label>Categoria financeira</Label>
