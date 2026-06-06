@@ -126,6 +126,13 @@ export const SummaryGrid = styled.div`
   @media (max-width: 520px) {
     grid-template-columns: 1fr;
   }
+
+  @media print {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+    break-inside: avoid-page;
+  }
 `;
 
 export const SummaryCard = styled.div<{ $variant?: 'income' | 'expense' }>`
@@ -169,6 +176,10 @@ export const ContentGrid = styled.div`
   @media (max-width: 1180px) {
     grid-template-columns: 1fr;
   }
+
+  @media print {
+    display: block;
+  }
 `;
 
 export const ReportSection = styled.section<{ $wide?: boolean }>`
@@ -177,10 +188,25 @@ export const ReportSection = styled.section<{ $wide?: boolean }>`
   padding: 1.25rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.07);
   ${({ $wide }) => $wide && 'grid-column: 1 / -1;'}
+
+  @media print {
+    margin-bottom: 0.75rem;
+    padding: 0.75rem;
+    box-shadow: none;
+    border: 1px solid #e5e7eb;
+    break-inside: avoid-page;
+    page-break-inside: avoid;
+  }
 `;
 
 export const SectionHeader = styled.div`
   margin-bottom: 1rem;
+
+  @media print {
+    margin-bottom: 0.5rem;
+    break-after: avoid-page;
+    page-break-after: avoid;
+  }
 `;
 
 export const SectionTitle = styled.h2`
@@ -198,21 +224,38 @@ export const SectionSubtitle = styled.p`
 export const TableWrapper = styled.div`
   width: 100%;
   overflow-x: auto;
+
+  @media print {
+    overflow: visible;
+  }
 `;
 
 export const Table = styled.table`
   width: 100%;
   border-collapse: collapse;
+
+  @media print {
+    table-layout: auto;
+
+    thead {
+      display: table-header-group;
+    }
+
+    tr {
+      break-inside: avoid-page;
+      page-break-inside: avoid;
+    }
+  }
 `;
 
-export const Th = styled.th`
+export const Th = styled.th<{ $align?: 'right' }>`
   padding: 0.75rem;
   background: #f9fafb;
   color: #6b7280;
   border-bottom: 1px solid #e5e7eb;
   font-size: 0.75rem;
   font-weight: 800;
-  text-align: left;
+  text-align: ${({ $align }) => ($align === 'right' ? 'right' : 'left')};
   text-transform: uppercase;
   white-space: nowrap;
 `;

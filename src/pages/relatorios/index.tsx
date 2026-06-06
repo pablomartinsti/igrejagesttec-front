@@ -291,7 +291,7 @@ export function RelatoriosPage() {
                     <thead>
                       <tr>
                         <Th>Categoria</Th>
-                        <Th>Total</Th>
+                        <Th $align="right">Total</Th>
                       </tr>
                     </thead>
                     <tbody>
@@ -324,8 +324,8 @@ export function RelatoriosPage() {
                     <thead>
                       <tr>
                         <Th>Categoria</Th>
-                        <Th>Entradas</Th>
-                        <Th>Saidas</Th>
+                        <Th $align="right">Entradas</Th>
+                        <Th $align="right">Saidas</Th>
                       </tr>
                     </thead>
                     <tbody>
@@ -379,8 +379,8 @@ export function RelatoriosPage() {
                         <Th>Data</Th>
                         <Th>Culto</Th>
                         <Th>Pregador</Th>
-                        <Th>Entradas</Th>
-                        <Th>Total arrecadado</Th>
+                        <Th $align="right">Entradas</Th>
+                        <Th $align="right">Total arrecadado</Th>
                       </tr>
                     </thead>
                     <tbody>
@@ -425,7 +425,7 @@ export function RelatoriosPage() {
                         <Th>Titulo</Th>
                         <Th>Categoria</Th>
                         <Th>Tipo</Th>
-                        <Th>Valor</Th>
+                        <Th $align="right">Valor</Th>
                       </tr>
                     </thead>
                     <tbody>
