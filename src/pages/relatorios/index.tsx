@@ -249,10 +249,6 @@ export function RelatoriosPage() {
       ) : (
         <>
           <SummaryGrid>
-            <SummaryCard>
-              <SummaryLabel>Saldo anterior</SummaryLabel>
-              <SummaryValue>{formatCurrency(report.previousBalance)}</SummaryValue>
-            </SummaryCard>
             <SummaryCard $variant="income">
               <SummaryLabel>Receitas do periodo</SummaryLabel>
               <SummaryValue $variant="income">
@@ -266,11 +262,7 @@ export function RelatoriosPage() {
               </SummaryValue>
             </SummaryCard>
             <SummaryCard>
-              <SummaryLabel>Saldo do periodo</SummaryLabel>
-              <SummaryValue>{formatCurrency(report.periodBalance)}</SummaryValue>
-            </SummaryCard>
-            <SummaryCard>
-              <SummaryLabel>Saldo final em caixa</SummaryLabel>
+              <SummaryLabel>Saldo em caixa</SummaryLabel>
               <SummaryValue>{formatCurrency(report.finalBalance)}</SummaryValue>
             </SummaryCard>
           </SummaryGrid>
